@@ -1,3 +1,3 @@
-const DB: String = 'myTube';
+const DB: string = 'myTube';
 
 export default DB;
