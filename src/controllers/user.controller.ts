@@ -5,6 +5,7 @@ import { ApiError } from '../utils/ApiError';
 import { uploadOnCloudinary } from '../utils/cloudinary';
 import { ApiResponse } from '../utils/ApiResponse';
 import { customRequest } from './../middlewares/auth.middleware';
+import jwt from 'jsonwebtoken';
 
 // cookies options
 const options: {} = {
@@ -155,5 +156,46 @@ export const logoutUser = asyncHandler(
       .json(
         new ApiResponse(200, { data: 'logged out' }, 'Logged out successfully')
       );
+  }
+);
+
+export const refreshAccessToken = asyncHandler(
+  async (req: customRequest, res: Response) => {
+    // 1. take the refresh token coming from user
+    const incomingRefreshToken: string =
+      req.cookies.refreshToken || req.body.refreshToken;
+
+    if (incomingRefreshToken) throw new ApiError(401, 'unauthorized request');
+
+    try {
+      // 2. verify the refresh token with the one in our backend
+      const decodedToken: string | jwt.JwtPayload = jwt.verify(
+        incomingRefreshToken,
+        process.env.REFRESH_TOKEN_SECRET
+      ) as jwt.JwtPayload;
+
+      // 3. if token is verified take the user id from it and search the user from that
+      const user = await User.findById(decodedToken._id);
+      if (!user) throw new ApiError(401, 'Invalid refresh token');
+
+      // 4. find the refresh token of that user on Db and match it with user token
+      if (incomingRefreshToken !== (user.refreshToken as unknown as string))
+        throw new ApiError(401, 'Refresh token is expired or used');
+
+      // 5. generate new access & refresh token for user
+      const { accessToken, refreshToken: newRefreshToken } =
+        await generateAccessAndRefreshTokens(user._id);
+
+      // 6. return response with new cookies set
+      return res
+        .status(200)
+        .cookie('accessToken', accessToken, options)
+        .cookie('refreshToken', newRefreshToken, options)
+        .json(
+          new ApiResponse(200, { accessToken, refreshToken: newRefreshToken })
+        );
+    } catch (error) {
+      throw new ApiError(401, error?.message || 'invalid refresh token');
+    }
   }
 );
