@@ -1,8 +1,8 @@
 interface errorType {
   statusCode: number;
   message: string;
-  error: Array<Object> | any;
-  stack: string;
+  error?: Array<Object> | any;
+  stack?: string;
   data: any | null;
 }
 
@@ -10,8 +10,8 @@ class ApiError extends Error implements errorType {
   constructor(
     statusCode: number,
     message: string = 'Something went wrong',
-    error: Array<Object> | any,
-    stack = ''
+    error?: Array<Object> | any,
+    stack?: string
   ) {
     super(message);
     this.statusCode = statusCode;

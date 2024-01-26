@@ -2,6 +2,8 @@ import express, { Express } from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 
+
+
 const app: Express = express();
 
 app.use(
@@ -19,6 +21,7 @@ app.use(
 );
 app.use(express.static('public'));
 app.use(cookieParser());
+
 
 // routes import
 import userRouter from './routes/user.routes';

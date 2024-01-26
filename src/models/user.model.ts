@@ -3,7 +3,7 @@ import { NextFunction } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
-type userType = {
+export type userType = {
   userName: string;
   watchHistory: Types.ObjectId;
   fullName: string;
@@ -46,7 +46,7 @@ const userSchema = new Schema<userType>(
 
 userSchema.pre('save', async function (next: NextFunction) {
   if (!this.isModified('password')) return next();
-
+  // encrypting password
   this.password = await bcrypt.hash(this.password, 10);
   next();
 });
