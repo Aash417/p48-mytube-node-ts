@@ -199,3 +199,33 @@ export const refreshAccessToken = asyncHandler(
     }
   }
 );
+
+export const changeCurrentPassword = asyncHandler(
+  async (req: customRequest, res: Response) => {
+    // 1. take old & new password from req.body
+    const { oldPassword, newPassword } = req.body;
+
+    // 2. verify the old password
+    const user = await User.findById(req.user?._id);
+    const isPasswordCorrect = await user.isPasswordCorrect(oldPassword);
+
+    if (!isPasswordCorrect) throw new ApiError(400, 'Invalid old password');
+
+    // 3. if verified change password
+    user.password = newPassword;
+    await user.save({ validateBeforeSave: false });
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, {}, 'Password changed successfully'));
+  }
+);
+
+export const getCurrentUser = asyncHandler(
+  async (req: customRequest, res: Response) => {
+    const data = req.user;
+    return res
+      .status(200)
+      .json(new ApiResponse(200, { data }, 'current user data'));
+  }
+);

@@ -4,6 +4,8 @@ import {
   logoutUser,
   registerUser,
   refreshAccessToken,
+  getCurrentUser,
+  changeCurrentPassword,
 } from './../controllers/user.controller';
 import { upload } from './../middlewares/multer.middleware';
 import { verifyJWT } from './../middlewares/auth.middleware';
@@ -26,5 +28,8 @@ router.route('/register').post(
 router.route('/login').post(loginUser);
 router.route('/logout').post(verifyJWT, logoutUser);
 router.route('/refresh-token').post(refreshAccessToken);
+
+router.route('/current-user').get(verifyJWT, getCurrentUser);
+router.route('/change-password').patch(verifyJWT, changeCurrentPassword);
 
 export default router;
