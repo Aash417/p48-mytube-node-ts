@@ -1,9 +1,16 @@
 import { Request, Response } from 'express';
-import { asyncHandler } from './../utils/asyncHandler';
+import { asyncHandler } from '../utils/asyncHandler';
 import User, { userType } from '../models/user.model';
 import { ApiError } from '../utils/ApiError';
 import { uploadOnCloudinary } from '../utils/cloudinary';
 import { ApiResponse } from '../utils/ApiResponse';
+import { customRequest } from './../middlewares/auth.middleware';
+
+// cookies options
+const options: {} = {
+  httpOnly: true,
+  secure: true,
+};
 
 export const registerUser = asyncHandler(
   async (req: Request, res: Response) => {
@@ -99,7 +106,7 @@ export const loginUser = asyncHandler(async (req: Request, res: Response) => {
   const { userName, email, password }: userType = req.body;
 
   // 2. username|email or password required**********************************
-  if (!userName || !password)
+  if (!userName && !email)
     throw new ApiError(400, 'Username and password is required');
 
   // 3. find the user********************************************************
@@ -119,10 +126,7 @@ export const loginUser = asyncHandler(async (req: Request, res: Response) => {
   const loggedInUser = await User.findById(user._id).select(
     '-password -refreshToken'
   );
-  const options: {} = {
-    httpOnly: true,
-    secure: true,
-  };
+
   return res
     .status(200)
     .cookie('accessToken', accessToken, options)
@@ -135,3 +139,21 @@ export const loginUser = asyncHandler(async (req: Request, res: Response) => {
       )
     );
 });
+
+export const logoutUser = asyncHandler(
+  async (req: customRequest, res: Response) => {
+    await User.findByIdAndUpdate(
+      req.user._id,
+      { $set: { refreshToken: undefined } },
+      { new: true }
+    );
+
+    return res
+      .status(200)
+      .clearCookie('accessToken', options)
+      .clearCookie('refreshToken', options)
+      .json(
+        new ApiResponse(200, { data: 'logged out' }, 'Logged out successfully')
+      );
+  }
+);
