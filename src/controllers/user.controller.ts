@@ -9,7 +9,7 @@ const registerUser = asyncHandler(async (req: Request, res: Response) => {
   // 1. get user user data from frontend*******************************
 
   const { userName, fullName, email, password }: userType = req.body;
-  // console.log(userName, email);
+  // console.log(`from usercontroller : req.body : `, req.body);
 
   // 2. validation*****************************************************
   if (
@@ -19,9 +19,9 @@ const registerUser = asyncHandler(async (req: Request, res: Response) => {
   }
 
   // 3. check if user already exists: username**************************
-  const existedUser = User.findOne({ $or: [{ userName }, { email }] });
-  console.log(existedUser);
-  if (!existedUser)
+  const existedUser = await User.findOne({ $or: [{ userName }, { email }] });
+  // console.log(`from user controller: exitsteduser: `, existedUser);
+  if (existedUser)
     throw new ApiError(409, 'User with email & username already exits');
 
   // 4. check for images, check for avatar*******************************
@@ -34,8 +34,8 @@ const registerUser = asyncHandler(async (req: Request, res: Response) => {
   const coverImageLocalPath = avatarFiles['coverImage']
     ? avatarFiles['coverImage'][0].path
     : undefined;
-
-  if (!avatarLocalPath) throw new ApiError(400, 'Avatar file is required.');
+  console.log(`from usercontroller : req.files : `, req.files);
+  // if (!avatarLocalPath) throw new ApiError(400, 'Avatar file is required.');
 
   // 5. upload them to cloudinary, avatar**********************************
   const uploadedAvatar = await uploadOnCloudinary(avatarLocalPath);
