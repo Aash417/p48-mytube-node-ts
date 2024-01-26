@@ -1,4 +1,4 @@
-import { Schema, Types, model } from 'mongoose';
+import { Document, Schema, Types, model } from 'mongoose';
 import { NextFunction } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
@@ -11,10 +11,16 @@ export type userType = {
   avatar: string;
   coverImage: string;
   password: string;
-  refreshToken: string;
+  refreshToken: Record<string, number>;
 };
 
-const userSchema = new Schema<userType>(
+interface userDocument extends userType, Document {
+  isPasswordCorrect(password: string): Promise<boolean>;
+  generateAccessToken: Function;
+  generateRefreshToken: Function;
+}
+
+const userSchema = new Schema<userDocument>(
   {
     userName: {
       type: String,
@@ -69,4 +75,6 @@ userSchema.methods.generateRefreshToken = function () {
   );
 };
 
-export const User = model<userType>('User', userSchema);
+const User = model<userDocument>('User', userSchema);
+
+export default User;
