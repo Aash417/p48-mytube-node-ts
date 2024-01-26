@@ -229,3 +229,22 @@ export const getCurrentUser = asyncHandler(
       .json(new ApiResponse(200, { data }, 'current user data'));
   }
 );
+
+export const updateAccountDetails = asyncHandler(
+  async (req: customRequest, res: Response) => {
+    const { fullName, email, userName }: userType = req.body;
+
+    if (!fullName || !email || !userName)
+      throw new ApiError(400, 'All fields are required');
+
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { $set: { fullName, email, userName } },
+      { new: true }
+    ).select('-password');
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, user, 'account details updated successfully'));
+  }
+);

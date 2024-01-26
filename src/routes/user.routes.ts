@@ -6,6 +6,7 @@ import {
   refreshAccessToken,
   getCurrentUser,
   changeCurrentPassword,
+  updateAccountDetails,
 } from './../controllers/user.controller';
 import { upload } from './../middlewares/multer.middleware';
 import { verifyJWT } from './../middlewares/auth.middleware';
@@ -31,5 +32,6 @@ router.route('/refresh-token').post(refreshAccessToken);
 
 router.route('/current-user').get(verifyJWT, getCurrentUser);
 router.route('/change-password').patch(verifyJWT, changeCurrentPassword);
+router.route('/update-user').patch(verifyJWT, updateAccountDetails);
 
 export default router;
