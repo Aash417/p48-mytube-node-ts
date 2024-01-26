@@ -11,7 +11,7 @@ export type userType = {
   avatar: string;
   coverImage: string;
   password: string;
-  refreshToken: Record<string, number>;
+  refreshToken: string;
 };
 
 interface userDocument extends userType, Document {

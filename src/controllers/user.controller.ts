@@ -13,6 +13,29 @@ const options: {} = {
   secure: true,
 };
 
+const generateAccessAndRefreshTokens = async (
+  userId: string
+): Promise<{
+  accessToken: {};
+  refreshToken: {};
+}> => {
+  try {
+    const user = await User.findById(userId);
+    const accessToken = user.generateAccessToken();
+    const refreshToken = user.generateRefreshToken();
+
+    user.refreshToken = refreshToken;
+    await user.save({ validateBeforeSave: false });
+
+    return { accessToken, refreshToken };
+  } catch (error) {
+    throw new ApiError(
+      500,
+      'something went wrong while generating refresh and access token'
+    );
+  }
+};
+
 export const registerUser = asyncHandler(
   async (req: Request, res: Response) => {
     // 1. get user user data from frontend*******************************
@@ -79,29 +102,6 @@ export const registerUser = asyncHandler(
   }
 );
 
-const generateAccessAndRefreshTokens = async (
-  userId: string
-): Promise<{
-  accessToken: {};
-  refreshToken: {};
-}> => {
-  try {
-    const user = await User.findById(userId);
-    const accessToken = user.generateAccessToken();
-    const refreshToken = user.generateRefreshToken();
-
-    user.refreshToken = refreshToken;
-    await user.save({ validateBeforeSave: false });
-
-    return { accessToken, refreshToken };
-  } catch (error) {
-    throw new ApiError(
-      500,
-      'something went wrong while generating refresh and access token'
-    );
-  }
-};
-
 export const loginUser = asyncHandler(async (req: Request, res: Response) => {
   // 1. req.body -> data*****************************************************
   const { userName, email, password }: userType = req.body;
@@ -165,7 +165,7 @@ export const refreshAccessToken = asyncHandler(
     const incomingRefreshToken: string =
       req.cookies.refreshToken || req.body.refreshToken;
 
-    if (incomingRefreshToken) throw new ApiError(401, 'unauthorized request');
+    if (!incomingRefreshToken) throw new ApiError(401, 'unauthorized request');
 
     try {
       // 2. verify the refresh token with the one in our backend
@@ -179,7 +179,7 @@ export const refreshAccessToken = asyncHandler(
       if (!user) throw new ApiError(401, 'Invalid refresh token');
 
       // 4. find the refresh token of that user on Db and match it with user token
-      if (incomingRefreshToken !== (user.refreshToken as unknown as string))
+      if (incomingRefreshToken !== user.refreshToken)
         throw new ApiError(401, 'Refresh token is expired or used');
 
       // 5. generate new access & refresh token for user
