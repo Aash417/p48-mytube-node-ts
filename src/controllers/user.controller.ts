@@ -146,7 +146,7 @@ export const logoutUser = asyncHandler(
   async (req: customRequest, res: Response) => {
     await User.findByIdAndUpdate(
       req.user._id,
-      { $set: { refreshToken: undefined } },
+      { $unset: { refreshToken: 1 } },
       { new: true }
     );
 
@@ -329,15 +329,15 @@ export const getUserChanelProfile = asyncHandler(
       },
       {
         $addFields: {
-          subscriberCount: {
-            $size: 'subscriber',
+          subscribersCount: {
+            $size: '$subscribers',
           },
-          channelSubscribedToCount: {
-            $size: 'subscribedTo',
+          channelsSubscribedToCount: {
+            $size: '$subscribedTo',
           },
           isSubscribed: {
             $cond: {
-              if: { $in: [req.user._id, 'subscribers.subscriber'] },
+              if: { $in: [req.user._id, '$subscribers.subscriber'] },
               then: true,
               else: false,
             },
