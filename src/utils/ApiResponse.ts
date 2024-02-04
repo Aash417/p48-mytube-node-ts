@@ -1,12 +1,12 @@
 class ApiResponse {
-  success: boolean;
+  results: number;
 
   constructor(
     public statusCode: number,
     public data: object,
     public message: string = 'Success'
   ) {
-    this.success = statusCode < 400;
+    this.results = Object.keys(data).length;
   }
 }
 

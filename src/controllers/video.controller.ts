@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import mongoose, { isValidObjectId } from 'mongoose';
+import { Types } from 'mongoose';
 import Video from '../models/video.model';
 import User from '../models/user.model';
 import { ApiError } from '../utils/ApiError';
@@ -54,17 +54,42 @@ export const publishAVideo = asyncHandler(
       throw new ApiError(500, 'Something went wrong while uploading the video');
 
     // 5. return the response
-
     return res
       .status(200)
-      .json(new ApiResponse(200, video, 'temporarily done'));
+      .json(new ApiResponse(200, video, 'video uploaded successfully.'));
   }
 );
 
 export const getAllVideos = asyncHandler(
   async (req: Request, res: Response) => {
-    const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query;
+    const { page = 1, limit = 10, query, sortBy = -1, userId } = req.query;
     //TODO: get all videos based on query, sort, pagination
+    if (!userId) throw new ApiError(500, 'A user id is mandatory');
+    const pageNumber = Number(page);
+    const pageSize = Number(limit);
+
+    const skip = (pageNumber - 1) * pageSize;
+
+    const videos = await Video.aggregate([
+      {
+        $match: { owner: Types.ObjectId.createFromHexString(userId as string) },
+      },
+      {
+        $sort: { createdAt: Number(sortBy) as 1 | -1 },
+      },
+      {
+        $skip: skip,
+      },
+      {
+        $limit: pageSize,
+      },
+    ]);
+
+    if (!Object.keys(videos).length) throw new ApiError(500, 'Failed to fetch');
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, videos, 'all videos fetched successfully'));
   }
 );
 
@@ -72,6 +97,8 @@ export const getVideoById = asyncHandler(
   async (req: Request, res: Response) => {
     const { videoId } = req.params;
     //TODO: get video by id
+
+    return res.status(200).json(new ApiResponse(200, {}, 'temporarily done.'));
   }
 );
 

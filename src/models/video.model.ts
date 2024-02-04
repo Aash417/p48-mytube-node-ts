@@ -1,7 +1,7 @@
 import { Schema, Types, model } from 'mongoose';
 import mongooseAggregatePaginate from 'mongoose-aggregate-paginate-v2';
 
-type videoType = {
+export type videoType = {
   videoFile: string;
   thumbnail: string;
   title: string;
