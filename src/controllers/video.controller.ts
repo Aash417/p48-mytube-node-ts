@@ -8,10 +8,21 @@ import { asyncHandler } from '../utils/asyncHandler';
 import { uploadOnCloudinary } from '../utils/cloudinary';
 import { customRequest } from './../middlewares/auth.middleware';
 
+// check if user is the owner of the video
+async function isUserOwner(
+  req: customRequest,
+  videoId: string
+): Promise<boolean> {
+  const video = await Video.findById(videoId);
+  if (video.owner.toString() === req.user._id.toString()) return true;
+
+  return false;
+}
+
 export const publishAVideo = asyncHandler(
   async (req: customRequest, res: Response) => {
-    const { title, description } = req.body;
     // TODO: get video, upload to cloudinary, create video
+    const { title, description } = req.body;
     if (!title || !description)
       throw new ApiError(400, 'Both title and description are required !');
 
@@ -62,14 +73,15 @@ export const publishAVideo = asyncHandler(
 
 export const getAllVideos = asyncHandler(
   async (req: Request, res: Response) => {
-    const { page = 1, limit = 10, query, sortBy = -1, userId } = req.query;
     //TODO: get all videos based on query, sort, pagination
+    const { page = 1, limit = 10, query, sortBy = -1, userId } = req.query;
+    // 1. check for user id
     if (!userId) throw new ApiError(500, 'A user id is mandatory');
     const pageNumber = Number(page);
     const pageSize = Number(limit);
-
     const skip = (pageNumber - 1) * pageSize;
 
+    // 2. list all videos of user
     const videos = await Video.aggregate([
       {
         $match: { owner: Types.ObjectId.createFromHexString(userId as string) },
@@ -87,6 +99,7 @@ export const getAllVideos = asyncHandler(
 
     if (!Object.keys(videos).length) throw new ApiError(500, 'Failed to fetch');
 
+    // 3. return response
     return res
       .status(200)
       .json(new ApiResponse(200, videos, 'data fetched successfully'));
@@ -95,8 +108,8 @@ export const getAllVideos = asyncHandler(
 
 export const getVideoById = asyncHandler(
   async (req: Request, res: Response) => {
-    const { videoId } = req.params;
     //TODO: get video by id
+    const { videoId } = req.params;
     if (!videoId) throw new ApiError(500, 'Provide a video Id.');
 
     const video = await Video.findById(videoId);
@@ -108,10 +121,56 @@ export const getVideoById = asyncHandler(
   }
 );
 
-export const updateVideo = asyncHandler(async (req: Request, res: Response) => {
-  const { videoId } = req.params;
-  //TODO: update video details like title, description, thumbnail
-});
+export const updateVideo = asyncHandler(
+  async (req: customRequest, res: Response) => {
+    //TODO: update video details like title, description, thumbnail
+
+    // 1. check if verified user is performing the action
+    const { videoId } = req.params;
+    const isVerified = await isUserOwner(req, videoId);
+    if (!isVerified) throw new ApiError(500, 'User cannot perform this action');
+
+    // 2. take new values from the user
+    const { title, description } = req.body;
+
+    // 3. check if at least one field is provided
+    if (!title && !description && !req.file)
+      throw new ApiError(500, 'Provide at least one field to update');
+
+    // 4. update with new values
+    type fieldType = {
+      title?: string;
+      description?: string;
+      thumbnail?: string;
+    };
+    const updateFields: fieldType = {}; // object to store fields to update
+
+    if (title) {
+      updateFields.title = title;
+    }
+    if (description) {
+      updateFields.description = description;
+    }
+    if (req.file) {
+      const thumbnailLocalPath = req.file.path;
+      updateFields.thumbnail = (
+        await uploadOnCloudinary(thumbnailLocalPath)
+      ).url;
+    }
+
+    const updated = await Video.findByIdAndUpdate(videoId, updateFields, {
+      new: true,
+      useFindAndModify: false,
+    });
+    if (!updated)
+      throw new ApiError(500, 'Something went wrong while updating');
+
+    // 5. return response
+    return res
+      .status(200)
+      .json(new ApiResponse(200, updated, 'Data updated successfully'));
+  }
+);
 
 export const deleteVideo = asyncHandler(async (req: Request, res: Response) => {
   const { videoId } = req.params;
