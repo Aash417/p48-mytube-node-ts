@@ -89,7 +89,7 @@ export const getAllVideos = asyncHandler(
 
     return res
       .status(200)
-      .json(new ApiResponse(200, videos, 'all videos fetched successfully'));
+      .json(new ApiResponse(200, videos, 'data fetched successfully'));
   }
 );
 
@@ -97,8 +97,14 @@ export const getVideoById = asyncHandler(
   async (req: Request, res: Response) => {
     const { videoId } = req.params;
     //TODO: get video by id
+    if (!videoId) throw new ApiError(500, 'Provide a video Id.');
 
-    return res.status(200).json(new ApiResponse(200, {}, 'temporarily done.'));
+    const video = await Video.findById(videoId);
+    if (!video) throw new ApiError(500, 'No video found with the ID');
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, video, 'data fetched successfully'));
   }
 );
 
