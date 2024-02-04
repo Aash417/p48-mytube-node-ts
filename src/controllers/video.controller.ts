@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { Types } from 'mongoose';
 import Video from '../models/video.model';
 import User from '../models/user.model';
@@ -9,15 +9,26 @@ import { uploadOnCloudinary } from '../utils/cloudinary';
 import { customRequest } from './../middlewares/auth.middleware';
 
 // check if user is the owner of the video
-async function isUserOwner(
-  req: customRequest,
-  videoId: string
-): Promise<boolean> {
-  const video = await Video.findById(videoId);
-  if (video.owner.toString() === req.user._id.toString()) return true;
+export const isUserOwner = asyncHandler(
+  async (req: customRequest, res: Response, next: NextFunction) => {
+    const { videoId } = req.params;
 
-  return false;
-}
+    const video = await Video.findById(videoId);
+    if (video.owner.toString() === req.user._id.toString()) return next();
+
+    throw new ApiError(500, 'You are not authorized to perform this action.');
+  }
+);
+
+// async function isUserOwner(
+//   req: customRequest,
+//   videoId: string
+// ): Promise<boolean> {
+//   const video = await Video.findById(videoId);
+//   if (video.owner.toString() === req.user._id.toString()) return true;
+
+//   return false;
+// }
 
 export const publishAVideo = asyncHandler(
   async (req: customRequest, res: Response) => {
@@ -125,10 +136,8 @@ export const updateVideo = asyncHandler(
   async (req: customRequest, res: Response) => {
     //TODO: update video details like title, description, thumbnail
 
-    // 1. check if verified user is performing the action
+    // 1. take video id from params
     const { videoId } = req.params;
-    const isVerified = await isUserOwner(req, videoId);
-    if (!isVerified) throw new ApiError(500, 'User cannot perform this action');
 
     // 2. take new values from the user
     const { title, description } = req.body;
@@ -173,8 +182,11 @@ export const updateVideo = asyncHandler(
 );
 
 export const deleteVideo = asyncHandler(async (req: Request, res: Response) => {
-  const { videoId } = req.params;
   //TODO: delete video
+  const { videoId } = req.params;
+  await Video.findByIdAndDelete(videoId);
+
+  res.status(200).json(new ApiResponse(200, {}, 'deleted successfully'));
 });
 
 export const togglePublishStatus = asyncHandler(
