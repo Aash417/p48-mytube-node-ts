@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { Video } from '../models/video.model';
+import Video from '../models/video.model';
 import { Subscription } from '../models/subscription.model';
 import { Like } from '../models/like.model';
 import { ApiError } from '../utils/ApiError';

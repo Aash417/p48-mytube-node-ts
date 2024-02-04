@@ -1,12 +1,12 @@
 import { Request, Response } from 'express';
-import { asyncHandler } from '../utils/asyncHandler';
+import jwt from 'jsonwebtoken';
 import User, { userType } from '../models/user.model';
+import { Types } from 'mongoose';
+import { asyncHandler } from '../utils/asyncHandler';
 import { ApiError } from '../utils/ApiError';
 import { uploadOnCloudinary } from '../utils/cloudinary';
 import { ApiResponse } from '../utils/ApiResponse';
 import { customRequest } from './../middlewares/auth.middleware';
-import jwt from 'jsonwebtoken';
-import { Types } from 'mongoose';
 
 // cookies options
 const options: {} = {
