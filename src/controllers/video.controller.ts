@@ -1,11 +1,11 @@
 import { Request, Response } from 'express';
 import mongoose, { isValidObjectId } from 'mongoose';
-import { Video } from '../models/video.model.js';
-// import {User} from "../models/user.model.js"
-import { ApiError } from '../utils/ApiError.js';
-import { ApiResponse } from '../utils/ApiResponse.js';
-import { asyncHandler } from '../utils/asyncHandler.js';
-import { uploadOnCloudinary } from '../utils/cloudinary.js';
+import { Video } from '../models/video.model';
+// import {User} from "../models/user.model"
+import { ApiError } from '../utils/ApiError';
+import { ApiResponse } from '../utils/ApiResponse';
+import { asyncHandler } from '../utils/asyncHandler';
+import { uploadOnCloudinary } from '../utils/cloudinary';
 
 export const getAllVideos = asyncHandler(
   async (req: Request, res: Response) => {

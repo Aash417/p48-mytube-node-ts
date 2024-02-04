@@ -1,10 +1,10 @@
 import { Request, Response } from 'express';
 import mongoose, { isValidObjectId } from 'mongoose';
-import { Tweet } from '../models/tweet.model.js';
-// import {User} from "../models/user.model.js"
-import { ApiError } from '../utils/ApiError.js';
-import { ApiResponse } from '../utils/ApiResponse.js';
-import { asyncHandler } from '../utils/asyncHandler.js';
+import { Tweet } from '../models/tweet.model';
+// import {User} from "../models/user.model"
+import { ApiError } from '../utils/ApiError';
+import { ApiResponse } from '../utils/ApiResponse';
+import { asyncHandler } from '../utils/asyncHandler';
 
 export const createTweet = asyncHandler(async (req: Request, res: Response) => {
   //TODO: create tweet
