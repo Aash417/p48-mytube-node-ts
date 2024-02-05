@@ -10,14 +10,16 @@ import { ApiResponse } from '../utils/ApiResponse';
 export const createTweet = asyncHandler(
   async (req: customRequest, res: Response) => {
     //TODO: create tweet
-    // 1. get content from user
     interface contentType {
       content: string;
     }
-    const { content }: contentType = req.body;
-    if (!content) throw new ApiError(400, 'some content is required to tweet.');
 
     try {
+      // 1. get content from user
+      const { content }: contentType = req.body;
+      if (!content)
+        throw new ApiError(400, 'some content is required to tweet.');
+
       // 2. put tweet in db
       const tweet = await Tweet.create({
         owner: req.user._id,
@@ -26,7 +28,7 @@ export const createTweet = asyncHandler(
       if (!tweet)
         throw new ApiError(500, 'Something went wrong while posting tweet.');
 
-      // 3. retrun res
+      // 3. return res
       res
         .status(200)
         .json(new ApiResponse(200, tweet, 'tweet successfully created'));
@@ -39,12 +41,13 @@ export const createTweet = asyncHandler(
 export const getUserTweets = asyncHandler(
   async (req: Request, res: Response) => {
     // TODO: get user tweets
-    // 1. get user id from params
-    const { userId } = req.params;
-    if (!userId && !isValidObjectId(userId))
-      throw new ApiError(400, 'Provide a valid user ID');
 
     try {
+      // 1. get user id from params
+      const { userId } = req.params;
+      if (!userId || !Types.ObjectId.isValid(userId))
+        throw new ApiError(400, 'Provide a valid user ID');
+
       // 2. check if user exists in db
       const user = await User.findById(
         Types.ObjectId.createFromHexString(userId)
@@ -76,19 +79,34 @@ export const getUserTweets = asyncHandler(
   }
 );
 
+export const getTweet = asyncHandler(async (req: Request, res: Response) => {
+  try {
+    const { tweetId } = req.params;
+    if (!tweetId || !Types.ObjectId.isValid(tweetId))
+      throw new ApiError(400, 'Provide a valid tweet ID');
+
+    const tweet = await Tweet.findById(tweetId);
+    if (!tweet) throw new ApiError(400, 'No tweet found with this id');
+
+    res.status(200).json(new ApiResponse(200, tweet, 'Tweet fetched.'));
+  } catch (error) {
+    res.status(500).json(new ApiResponse(500, {}, error.message));
+  }
+});
+
 export const updateTweet = asyncHandler(async (req: Request, res: Response) => {
   //TODO: update tweet
 });
 
 export const deleteTweet = asyncHandler(async (req: Request, res: Response) => {
   //TODO: delete tweet
-  // 1. get id from params
-  const { tweetId } = req.params;
-  if (!tweetId && !isValidObjectId(tweetId))
-    throw new ApiError(400, 'Provide a valid tweet ID');
-
-  // 2. delete tweet
   try {
+    // 1. get id from params
+    const { tweetId } = req.params;
+    if (!tweetId || !Types.ObjectId.isValid(tweetId))
+      throw new ApiError(400, 'Provide a valid tweet ID');
+
+    // 2. delete tweet
     await Tweet.findByIdAndDelete(tweetId);
     res
       .status(200)

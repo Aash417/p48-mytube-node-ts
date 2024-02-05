@@ -3,6 +3,7 @@ import { Router } from 'express';
 import {
   createTweet,
   deleteTweet,
+  getTweet,
   getUserTweets,
   updateTweet,
 } from '../controllers/tweet.controller';
@@ -13,6 +14,10 @@ router.use(verifyJWT); // Apply verifyJWT middleware to all routes in this file
 
 router.route('/').post(createTweet);
 router.route('/user/:userId').get(getUserTweets);
-router.route('/:tweetId').patch(updateTweet).delete(isUserOwner, deleteTweet);
+router
+  .route('/:tweetId')
+  .get(getTweet)
+  .patch(isUserOwner, updateTweet)
+  .delete(isUserOwner, deleteTweet);
 
 export default router;
