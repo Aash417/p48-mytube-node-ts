@@ -7,13 +7,13 @@ import { ApiError } from '../utils/ApiError';
 import { asyncHandler } from '../utils/asyncHandler';
 import { ApiResponse } from '../utils/ApiResponse';
 
+interface contentType {
+  content: string;
+}
+
 export const createTweet = asyncHandler(
   async (req: customRequest, res: Response) => {
     //TODO: create tweet
-    interface contentType {
-      content: string;
-    }
-
     try {
       // 1. get content from user
       const { content }: contentType = req.body;
@@ -96,6 +96,35 @@ export const getTweet = asyncHandler(async (req: Request, res: Response) => {
 
 export const updateTweet = asyncHandler(async (req: Request, res: Response) => {
   //TODO: update tweet
+  try {
+    // 1. get id from params
+    const { tweetId } = req.params;
+    if (!tweetId || !Types.ObjectId.isValid(tweetId))
+      throw new ApiError(400, 'Provide a valid tweet ID');
+
+    // 2. get content from body
+    const { content }: contentType = req.body;
+    if (!content) throw new ApiError(400, 'some content is required to tweet.');
+
+    // 3. update tweet
+    const tweet = await Tweet.findByIdAndUpdate(
+      tweetId,
+      { content },
+      {
+        new: true,
+        useFindAndModify: false,
+      }
+    );
+    if (!tweet)
+      throw new ApiError(500, 'Something went wrong while updating tweet.');
+
+    // 4. return response
+    res
+      .status(200)
+      .json(new ApiResponse(200, tweet, 'tweet updated successfully'));
+  } catch (error) {
+    res.status(500).json(new ApiResponse(500, {}, error.message));
+  }
 });
 
 export const deleteTweet = asyncHandler(async (req: Request, res: Response) => {
