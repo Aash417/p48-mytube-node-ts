@@ -5,7 +5,7 @@ import { ApiError } from '../utils/ApiError';
 import User from '../models/user.model';
 
 export interface customRequest extends Request {
-  user?: { _id?: string };
+  user: { _id: string };
 }
 
 export const verifyJWT = asyncHandler(

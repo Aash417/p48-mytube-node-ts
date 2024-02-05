@@ -1,34 +1,11 @@
-import { NextFunction, Request, Response } from 'express';
+import { Request, Response } from 'express';
 import { Types } from 'mongoose';
 import Video from '../models/video.model';
-import User from '../models/user.model';
 import { ApiError } from '../utils/ApiError';
 import { ApiResponse } from '../utils/ApiResponse';
 import { asyncHandler } from '../utils/asyncHandler';
 import { uploadOnCloudinary } from '../utils/cloudinary';
 import { customRequest } from './../middlewares/auth.middleware';
-
-// check if user is the owner of the video
-export const isUserOwner = asyncHandler(
-  async (req: customRequest, res: Response, next: NextFunction) => {
-    const { videoId } = req.params;
-
-    const video = await Video.findById(videoId);
-    if (video.owner.toString() === req.user._id.toString()) return next();
-
-    throw new ApiError(500, 'You are not authorized to perform this action.');
-  }
-);
-
-// async function isUserOwner(
-//   req: customRequest,
-//   videoId: string
-// ): Promise<boolean> {
-//   const video = await Video.findById(videoId);
-//   if (video.owner.toString() === req.user._id.toString()) return true;
-
-//   return false;
-// }
 
 export const publishAVideo = asyncHandler(
   async (req: customRequest, res: Response) => {

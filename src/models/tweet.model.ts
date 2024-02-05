@@ -13,4 +13,6 @@ const tweetSchema = new Schema<tweetType>(
   { timestamps: true }
 );
 
-export const Tweet = model<tweetType>('Tweet', tweetSchema);
+const Tweet = model<tweetType>('Tweet', tweetSchema);
+
+export default Tweet;
