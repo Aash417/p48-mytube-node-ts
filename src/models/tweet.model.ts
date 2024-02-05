@@ -1,9 +1,9 @@
 import { Schema, Types, model } from 'mongoose';
 
-type tweetType = {
+export interface tweetType {
   owner: Types.ObjectId;
   content: string;
-};
+}
 
 const tweetSchema = new Schema<tweetType>(
   {
