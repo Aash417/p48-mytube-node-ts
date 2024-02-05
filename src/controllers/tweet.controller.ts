@@ -82,4 +82,18 @@ export const updateTweet = asyncHandler(async (req: Request, res: Response) => {
 
 export const deleteTweet = asyncHandler(async (req: Request, res: Response) => {
   //TODO: delete tweet
+  // 1. get id from params
+  const { tweetId } = req.params;
+  if (!tweetId && !isValidObjectId(tweetId))
+    throw new ApiError(400, 'Provide a valid tweet ID');
+
+  // 2. delete tweet
+  try {
+    await Tweet.findByIdAndDelete(tweetId);
+    res
+      .status(200)
+      .json(new ApiResponse(200, {}, 'tweet deleted successfully'));
+  } catch (error) {
+    res.status(500).json(new ApiResponse(500, {}, error.message));
+  }
 });
