@@ -1,7 +1,7 @@
 import { Schema, Types, model } from 'mongoose';
 import mongooseAggregatePaginate from 'mongoose-aggregate-paginate-v2';
 
-type commentType = {
+export type commentType = {
   content: string;
   video: Types.ObjectId;
   owner: Types.ObjectId;
