@@ -105,5 +105,22 @@ export const updateComment = asyncHandler(
 export const deleteComment = asyncHandler(
   async (req: Request, res: Response) => {
     // TODO: delete a comment
+    try {
+      // 1. get comment id
+      const { commentId } = req.params;
+      if (!commentId || !Types.ObjectId.isValid(commentId))
+        throw new ApiError(400, 'Provide a valid comment ID.');
+
+      // 2. check if comment exists
+      const comment: commentType = await Comment.findByIdAndDelete(commentId);
+      if (!comment) throw new ApiError(400, 'No such comment exists.');
+
+      // 3. return response
+      res.status(200).json(new ApiResponse(200, {}, 'deleted successfully'));
+    } catch (error) {
+      res
+        .status(error.statusCode)
+        .json(new ApiResponse(error.statusCode, {}, error.message));
+    }
   }
 );
