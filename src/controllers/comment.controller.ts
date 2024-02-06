@@ -1,17 +1,58 @@
-import { Request, Response, response } from 'express';
+import { Request, Response } from 'express';
 import { Types } from 'mongoose';
 import Comment, { commentType } from '../models/comment.model';
+import Video from '../models/video.model';
 import { ApiError } from '../utils/ApiError';
 import { ApiResponse } from '../utils/ApiResponse';
-import { contentType, customRequest } from './../utils/helper';
 import { asyncHandler } from '../utils/asyncHandler';
-import Video from '../models/video.model';
+import { contentType, customRequest } from './../utils/helper';
 
 export const getVideoComments = asyncHandler(
   async (req: Request, res: Response) => {
     //TODO: get all comments for a video
-    const { videoId } = req.params;
-    const { page = 1, limit = 10 } = req.query;
+    try {
+      const { videoId } = req.params;
+      const { page = 1, limit = 10, sortBy = -1 } = req.query;
+      const pageNumber = Number(page);
+      const pageSize = Number(limit);
+      const skip = (pageNumber - 1) * pageSize;
+
+      // 1. check for videoId
+      if (!videoId || !Types.ObjectId.isValid(videoId))
+        throw new ApiError(500, 'Provide a valid video ID');
+
+      // 2. check if video exists
+      const video = await Video.findById(videoId);
+      if (!video) throw new ApiError(400, 'No such video exists.');
+
+      // 3. fetch all comments of video
+      const comments: commentType[] = await Comment.aggregate([
+        {
+          $match: {
+            video: Types.ObjectId.createFromHexString(videoId),
+          },
+        },
+        {
+          $sort: { createdAt: Number(sortBy) as 1 | -1 },
+        },
+        {
+          $skip: skip,
+        },
+        {
+          $limit: pageSize,
+        },
+      ]);
+      if (!comments) throw new ApiError(500, 'Failed to fetch comments.');
+
+      // 4. return response
+      return res
+        .status(200)
+        .json(new ApiResponse(200, comments, 'comments fetched successfully'));
+    } catch (error) {
+      res
+        .status(error.statusCode)
+        .json(new ApiResponse(error.statusCode, {}, error.message));
+    }
   }
 );
 
