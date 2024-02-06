@@ -5,7 +5,7 @@ import { ApiError } from '../utils/ApiError';
 import { ApiResponse } from '../utils/ApiResponse';
 import { asyncHandler } from '../utils/asyncHandler';
 import { uploadOnCloudinary } from '../utils/cloudinary';
-import { customRequest } from './../middlewares/auth.middleware';
+import { customRequest } from '../utils/helper';
 
 export const publishAVideo = asyncHandler(
   async (req: customRequest, res: Response) => {

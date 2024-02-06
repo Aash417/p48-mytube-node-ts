@@ -2,7 +2,7 @@ import { Types } from 'mongoose';
 import { NextFunction, Response } from 'express';
 import { ApiError } from '../utils/ApiError';
 import { asyncHandler } from '../utils/asyncHandler';
-import { customRequest } from './auth.middleware';
+import { customRequest } from '../utils/helper';
 import Tweet from '../models/tweet.model';
 import { ApiResponse } from '../utils/ApiResponse';
 

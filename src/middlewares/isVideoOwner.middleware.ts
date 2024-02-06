@@ -2,7 +2,7 @@ import { NextFunction } from 'express';
 import Video from '../models/video.model';
 import { ApiError } from '../utils/ApiError';
 import { asyncHandler } from '../utils/asyncHandler';
-import { customRequest } from './auth.middleware';
+import { customRequest } from '../utils/helper';
 
 // check if user is the owner of the video
 export const isUserOwner = asyncHandler(

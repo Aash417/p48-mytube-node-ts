@@ -1,15 +1,11 @@
-import { Types, isValidObjectId } from 'mongoose';
 import { Request, Response } from 'express';
+import { Types } from 'mongoose';
 import Tweet, { tweetType } from '../models/tweet.model';
 import User from '../models/user.model';
-import { customRequest } from './../middlewares/auth.middleware';
 import { ApiError } from '../utils/ApiError';
-import { asyncHandler } from '../utils/asyncHandler';
 import { ApiResponse } from '../utils/ApiResponse';
-
-interface contentType {
-  content: string;
-}
+import { asyncHandler } from '../utils/asyncHandler';
+import { contentType, customRequest } from '../utils/helper';
 
 export const createTweet = asyncHandler(
   async (req: customRequest, res: Response) => {

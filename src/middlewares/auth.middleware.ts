@@ -1,12 +1,9 @@
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { asyncHandler } from '../utils/asyncHandler';
 import { ApiError } from '../utils/ApiError';
 import User from '../models/user.model';
-
-export interface customRequest extends Request {
-  user: { _id: string };
-}
+import { customRequest } from '../utils/helper';
 
 export const verifyJWT = asyncHandler(
   async (req: customRequest, res: Response, next: NextFunction) => {

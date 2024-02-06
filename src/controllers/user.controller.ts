@@ -6,13 +6,8 @@ import { asyncHandler } from '../utils/asyncHandler';
 import { ApiError } from '../utils/ApiError';
 import { uploadOnCloudinary } from '../utils/cloudinary';
 import { ApiResponse } from '../utils/ApiResponse';
-import { customRequest } from './../middlewares/auth.middleware';
-
-// cookies options
-const options: {} = {
-  httpOnly: true,
-  secure: true,
-};
+import { customRequest } from '../utils/helper';
+import { options } from '../utils/helper';
 
 const generateAccessAndRefreshTokens = async (
   userId: string
