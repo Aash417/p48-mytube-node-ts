@@ -74,7 +74,9 @@ export const getPlaylistById = asyncHandler(
       if (!playlist) throw new ApiError(500, 'Failed to fetch playlist.');
 
       // 3. return response
-      res.status(200).json(new ApiResponse(200, playlist, 'created.'));
+      res
+        .status(200)
+        .json(new ApiResponse(200, playlist, 'playlist fetched successfully.'));
     } catch (error) {
       res
         .status(error.statusCode)

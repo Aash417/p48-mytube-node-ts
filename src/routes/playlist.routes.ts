@@ -9,6 +9,7 @@ import {
   updatePlaylist,
 } from '../controllers/playlist.controller';
 import { verifyJWT } from '../middlewares/auth.middleware';
+import isAuthenticated from '../middlewares/isAuthenticated.middleware';
 
 const router: Router = Router();
 
@@ -18,7 +19,7 @@ router.route('/').post(createPlaylist);
 
 router
   .route('/:playlistId')
-  .get(getPlaylistById)
+  .get(isAuthenticated('playlist'), getPlaylistById)
   .patch(updatePlaylist)
   .delete(deletePlaylist);
 
