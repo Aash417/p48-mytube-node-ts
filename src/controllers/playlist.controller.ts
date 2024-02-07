@@ -1,15 +1,30 @@
 import { Request, Response } from 'express';
-import mongoose, { isValidObjectId } from 'mongoose';
-import { Playlist } from '../models/playlist.model';
+import Playlist, { playlistType } from '../models/playlist.model';
 import { ApiError } from '../utils/ApiError';
 import { ApiResponse } from '../utils/ApiResponse';
 import { asyncHandler } from '../utils/asyncHandler';
+import { customRequest } from '../utils/helper';
 
 export const createPlaylist = asyncHandler(
-  async (req: Request, res: Response) => {
-    const { name, description } = req.body;
+  async (req: customRequest, res: Response) => {
+    try {
+      const { name, description = '' }: playlistType = req.body;
+      if (!name) throw new ApiError(400, 'A playlist name is required.');
+      //TODO: create playlist
 
-    //TODO: create playlist
+      const playlist: playlistType = await Playlist.create({
+        name,
+        description,
+        owner: req.user._id,
+      });
+      if (!playlist) throw new ApiError(500, 'Failed to create playlist.');
+
+      res.status(200).json(new ApiResponse(200, playlist, 'Playlist created.'));
+    } catch (error) {
+      res
+        .status(error.statusCode)
+        .json(new ApiResponse(error.statusCode, {}, error.message));
+    }
   }
 );
 
