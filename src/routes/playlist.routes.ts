@@ -27,7 +27,7 @@ router
   .route('/add/:playlistId/:videoId')
   .patch(isAuthenticated('playlist'), addVideoToPlaylist);
 router
-  .route('/remove/:videoId/:playlistId')
+  .route('/remove/:playlistId/:videoId')
   .patch(isAuthenticated('playlist'), removeVideoFromPlaylist);
 
 router.route('/user/:userId').get(getUserPlaylists);

@@ -1,10 +1,11 @@
-import { Request, Response, response } from 'express';
+import { Request, Response } from 'express';
+import { Types } from 'mongoose';
 import Playlist, { playlistType } from '../models/playlist.model';
+import Video from '../models/video.model';
 import { ApiError } from '../utils/ApiError';
 import { ApiResponse } from '../utils/ApiResponse';
 import { asyncHandler } from '../utils/asyncHandler';
 import { customRequest } from '../utils/helper';
-import { Types } from 'mongoose';
 
 export const createPlaylist = asyncHandler(
   async (req: customRequest, res: Response) => {
@@ -98,16 +99,28 @@ export const addVideoToPlaylist = asyncHandler(
       )
         throw new ApiError(400, 'Provide a valid ID.');
 
-      // 2. check if playlist, if yes update
+      // 2. check if both playlist & video exists
+      if (
+        !(await Playlist.findById(playlistId)) ||
+        !(await Video.findById(videoId))
+      )
+        throw new ApiError(
+          409,
+          'resource not found not found, please provide valid playlistId & videoId.'
+        );
+
+      // 3. if yes insert and update
       const updatedPlaylist = await Playlist.updateOne(
         { _id: playlistId },
-        { $set: { videos: videoId } }
+        { $push: { videos: videoId } }
       );
       if (!updatedPlaylist)
         throw new ApiError(500, 'Failed adding to playlist');
 
-      // 3. return response
-      res.status(200).json(new ApiResponse(200, updatedPlaylist, 'done'));
+      // 4. return response
+      res
+        .status(200)
+        .json(new ApiResponse(200, updatedPlaylist, 'Video added to playlist'));
     } catch (error) {
       res
         .status(error.statusCode)
@@ -118,8 +131,56 @@ export const addVideoToPlaylist = asyncHandler(
 
 export const removeVideoFromPlaylist = asyncHandler(
   async (req: Request, res: Response) => {
-    const { playlistId, videoId } = req.params;
     // TODO: remove video from playlist
+
+    // 1. get playlist and video id
+    try {
+      const { playlistId, videoId } = req.params;
+      if (
+        !playlistId ||
+        !Types.ObjectId.isValid(playlistId) ||
+        !videoId ||
+        !Types.ObjectId.isValid(videoId)
+      )
+        throw new ApiError(400, 'Provide a valid ID.');
+
+      // 2. check if both playlist & video exists
+      if (
+        !(await Playlist.findById(playlistId)) ||
+        !(await Video.findById(videoId))
+      )
+        throw new ApiError(
+          409,
+          'resource not found not found, please provide valid playlistId & videoId.'
+        );
+
+      // 3. check if video exits in playlist
+      const videoExistsInPlaylist = await Playlist.findOne({
+        _id: playlistId,
+        videos: videoId,
+      });
+      if (!videoExistsInPlaylist)
+        throw new ApiError(400, 'This video doesnt exists in the playlist');
+
+      // 4.  if yes remove and update
+      const updatedPlaylist = await Playlist.updateOne(
+        { _id: playlistId },
+        { $pull: { videos: videoId } }
+      );
+      if (!updatedPlaylist)
+        throw new ApiError(500, 'Failed removing from playlist');
+
+      // 5. return response
+      res
+        .status(200)
+        .json(
+          new ApiResponse(200, updatedPlaylist, 'Video removed from playlist')
+        );
+    } catch (error) {
+      res
+        .status(error.statusCode)
+        .json(new ApiResponse(error.statusCode, {}, error.message));
+    }
   }
 );
 
