@@ -19,12 +19,16 @@ router.route('/').post(createPlaylist);
 
 router
   .route('/:playlistId')
-  .get(isAuthenticated('playlist'), getPlaylistById)
-  .patch(updatePlaylist)
-  .delete(deletePlaylist);
+  .get(getPlaylistById)
+  .patch(isAuthenticated('playlist'), updatePlaylist)
+  .delete(isAuthenticated('playlist'), deletePlaylist);
 
-router.route('/add/:videoId/:playlistId').patch(addVideoToPlaylist);
-router.route('/remove/:videoId/:playlistId').patch(removeVideoFromPlaylist);
+router
+  .route('/add/:videoId/:playlistId')
+  .patch(isAuthenticated('playlist'), addVideoToPlaylist);
+router
+  .route('/remove/:videoId/:playlistId')
+  .patch(isAuthenticated('playlist'), removeVideoFromPlaylist);
 
 router.route('/user/:userId').get(getUserPlaylists);
 

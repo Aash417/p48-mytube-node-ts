@@ -107,8 +107,55 @@ export const deletePlaylist = asyncHandler(
 
 export const updatePlaylist = asyncHandler(
   async (req: Request, res: Response) => {
-    const { playlistId } = req.params;
-    const { name, description } = req.body;
     //TODO: update playlist
+    try {
+      // 1. get playlist Id
+      const { playlistId } = req.params;
+      if (!playlistId || !Types.ObjectId.isValid(playlistId))
+        throw new ApiError(400, 'Provide a valid video ID.');
+
+      // 2. get content to be updated
+      const { name, description } = req.body;
+      if (!name && !description)
+        throw new ApiError(500, 'Provide at least one field to update');
+
+      // 3. find and update playlist
+      type fieldType = {
+        name?: string;
+        description?: string;
+      };
+      const updateFields: fieldType = {};
+      if (name) {
+        updateFields.name = name;
+      }
+      if (description) {
+        updateFields.description = description;
+      }
+      const updatedPlaylist = await Playlist.findByIdAndUpdate(
+        playlistId,
+        updateFields,
+        {
+          new: true,
+          useFindAndModify: false,
+        }
+      );
+      if (!updatedPlaylist)
+        throw new ApiError(500, 'Something went wrong while updating');
+
+      // 4. return response
+      res
+        .status(200)
+        .json(
+          new ApiResponse(
+            200,
+            updatedPlaylist,
+            'playlist updated successfully.'
+          )
+        );
+    } catch (error) {
+      res
+        .status(error.statusCode)
+        .json(new ApiResponse(error.statusCode, {}, error.message));
+    }
   }
 );
