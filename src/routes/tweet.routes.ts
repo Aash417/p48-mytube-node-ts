@@ -1,4 +1,3 @@
-import { isUserOwner } from './../middlewares/isTweetOwner.middleware';
 import { Router } from 'express';
 import {
   createTweet,
@@ -8,6 +7,7 @@ import {
   updateTweet,
 } from '../controllers/tweet.controller';
 import { verifyJWT } from '../middlewares/auth.middleware';
+import isAuthenticated from '../middlewares/isAuthenticated.middleware';
 
 const router: Router = Router();
 router.use(verifyJWT); // Apply verifyJWT middleware to all routes in this file
@@ -17,7 +17,7 @@ router.route('/user/:userId').get(getUserTweets);
 router
   .route('/:tweetId')
   .get(getTweet)
-  .patch(isUserOwner, updateTweet)
-  .delete(isUserOwner, deleteTweet);
+  .patch(isAuthenticated('tweet'), updateTweet)
+  .delete(isAuthenticated('tweet'), deleteTweet);
 
 export default router;
