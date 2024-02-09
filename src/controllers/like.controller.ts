@@ -154,7 +154,23 @@ export const toggleTweetLike = asyncHandler(
 );
 
 export const getLikedVideos = asyncHandler(
-  async (req: Request, res: Response) => {
+  async (req: customRequest, res: Response) => {
     //TODO: get all liked videos
+
+    try {
+      const videos = await Like.find({
+        likedBy: req.user._id,
+        video: { $exists: true },
+      });
+      if (!videos) throw new ApiError(500, 'Failed to fetch liked videos');
+      // 5. return response
+      return res
+        .status(200)
+        .json(new ApiResponse(200, videos, 'Like videos fetched successfully'));
+    } catch (error) {
+      res
+        .status(error.statusCode)
+        .json(new ApiResponse(error.statusCode, {}, error.message));
+    }
   }
 );
