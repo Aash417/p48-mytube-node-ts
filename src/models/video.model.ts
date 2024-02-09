@@ -9,7 +9,15 @@ export type videoType = {
   duration: number;
   views: number;
   isPublished: boolean;
-  owner: Types.ObjectId;
+  owner?: {
+    prototype?: Types.ObjectId;
+    cacheHexString?: unknown;
+    generate?: {};
+    createFromTime?: {};
+    createFromHexString?: {};
+    createFromBase64?: {};
+    isValid?: {};
+  };
 };
 
 const videoSchema = new Schema<videoType>(
@@ -21,7 +29,7 @@ const videoSchema = new Schema<videoType>(
     duration: { type: Number, required: true },
     views: { type: Number, default: 0 },
     isPublished: { type: Boolean, default: true },
-    owner: [{ type: Types.ObjectId, ref: 'User' }],
+    owner: { type: Types.ObjectId, ref: 'User' },
   },
   { timestamps: true }
 );
