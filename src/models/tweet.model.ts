@@ -1,13 +1,21 @@
 import { Schema, Types, model } from 'mongoose';
 
 export interface tweetType {
-  owner: Types.ObjectId;
+  owner?: {
+    prototype?: Types.ObjectId;
+    cacheHexString?: unknown;
+    generate?: {};
+    createFromTime?: {};
+    createFromHexString?: {};
+    createFromBase64?: {};
+    isValid?: {};
+  };
   content: string;
 }
 
 const tweetSchema = new Schema<tweetType>(
   {
-    owner: [{ type: Types.ObjectId, ref: 'User' }],
+    owner: { type: Types.ObjectId, ref: 'User' },
     content: { type: String, required: true },
   },
   { timestamps: true }
