@@ -9,14 +9,8 @@ export type videoType = {
   duration: number;
   views: number;
   isPublished: boolean;
-  owner?: {
-    prototype?: Types.ObjectId;
-    cacheHexString?: unknown;
-    generate?: {};
-    createFromTime?: {};
-    createFromHexString?: {};
-    createFromBase64?: {};
-    isValid?: {};
+  owner: {
+    prototype: Types.ObjectId;
   };
 };
 

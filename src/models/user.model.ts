@@ -1,7 +1,7 @@
-import { Document, Schema, Types, model } from 'mongoose';
-import { NextFunction } from 'express';
 import bcrypt from 'bcrypt';
+import { NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import { Document, Schema, Types, model } from 'mongoose';
 
 export type userType = {
   userName: string;

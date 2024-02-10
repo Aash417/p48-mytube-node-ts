@@ -1,13 +1,13 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { Types } from 'mongoose';
-import { Like, likeType } from '../models/like.model';
+import Comment, { commentType } from '../models/comment.model';
+import Like, { likeType } from '../models/like.model';
+import Tweet, { tweetType } from '../models/tweet.model';
 import Video, { videoType } from '../models/video.model';
 import { ApiError } from '../utils/ApiError';
 import { ApiResponse } from '../utils/ApiResponse';
 import { asyncHandler } from '../utils/asyncHandler';
 import { customRequest } from './../utils/helper';
-import Comment, { commentType } from '../models/comment.model';
-import Tweet, { tweetType } from '../models/tweet.model';
 
 export const toggleVideoLike = asyncHandler(
   async (req: customRequest, res: Response) => {

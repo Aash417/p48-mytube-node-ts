@@ -3,31 +3,19 @@ import mongooseAggregatePaginate from 'mongoose-aggregate-paginate-v2';
 
 export type commentType = {
   content: string;
-  video?: {
-    prototype?: Types.ObjectId;
-    cacheHexString?: unknown;
-    generate?: {};
-    createFromTime?: {};
-    createFromHexString?: {};
-    createFromBase64?: {};
-    isValid?: {};
+  video: {
+    prototype: Types.ObjectId;
   };
-  owner?: {
-    prototype?: Types.ObjectId;
-    cacheHexString?: unknown;
-    generate?: {};
-    createFromTime?: {};
-    createFromHexString?: {};
-    createFromBase64?: {};
-    isValid?: {};
+  owner: {
+    prototype: Types.ObjectId;
   };
 };
 
 const commentSchema = new Schema<commentType>(
   {
     content: { type: String, required: true },
-    video: { type: Types.ObjectId, ref: 'Video' },
-    owner: { type: Types.ObjectId, ref: 'User' },
+    video: { type: Types.ObjectId, ref: 'Video', required: true },
+    owner: { type: Types.ObjectId, ref: 'User', required: true },
   },
   { timestamps: true }
 );
