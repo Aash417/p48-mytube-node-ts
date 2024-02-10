@@ -63,13 +63,43 @@ export const toggleSubscription = asyncHandler(
 // controller to return subscriber list of a channel
 export const getUserChannelSubscribers = asyncHandler(
   async (req: Request, res: Response) => {
-    const { channelId } = req.params;
+    try {
+      // 1. get channelId from user
+      const { channelId } = req.params;
+      if (!channelId || !Types.ObjectId.isValid(channelId))
+        throw new ApiError(500, 'Provide a valid channel ID');
+
+      // 2. check if channel exists
+      const channel: userType = await User.findById(channelId);
+      if (!channel) throw new ApiError(400, 'No such channel exists.');
+
+      // 3. find all docs having channelId = total subscriber
+      const subscriber = await Subscription.aggregate([
+        {
+          $match: { channel: Types.ObjectId.createFromHexString(channelId) },
+        },
+        {
+          $project: {
+            subscriber: 1,
+          },
+        },
+      ]);
+      if (!subscriber)
+        throw new ApiError(500, 'Failed to fetch subscriber list');
+
+      // 4. return response
+      return res.status(200).json(new ApiResponse(200, subscriber, 'done'));
+    } catch (error) {
+      res
+        .status(error.statusCode)
+        .json(new ApiResponse(error.statusCode, {}, error.message));
+    }
   }
 );
 
 // controller to return channel list to which user has subscribed
 export const getSubscribedChannels = asyncHandler(
   async (req: Request, res: Response) => {
-    const { subscriberId } = req.params;
+
   }
 );
