@@ -1,19 +1,25 @@
 import { Schema, Types, model } from 'mongoose';
 
-type subscriptionType = {
-  subscriber: Types.ObjectId;
-  channel: Types.ObjectId;
-};
+export interface subscriptionType {
+  subscriber: {
+    prototype: Types.ObjectId;
+  };
+  channel: {
+    prototype: Types.ObjectId;
+  };
+}
 
 const subscriptionSchema = new Schema<subscriptionType>(
   {
-    subscriber: [{ type: Types.ObjectId, ref: 'User' }],
-    channel: [{ type: Types.ObjectId, ref: 'User' }],
+    subscriber: { type: Types.ObjectId, ref: 'User', required: true },
+    channel: { type: Types.ObjectId, ref: 'User', required: true },
   },
   { timestamps: true }
 );
 
-export const Subscription = model<subscriptionType>(
+const Subscription = model<subscriptionType>(
   'Subscription',
   subscriptionSchema
 );
+
+export default Subscription;
