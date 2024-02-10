@@ -100,6 +100,37 @@ export const getUserChannelSubscribers = asyncHandler(
 // controller to return channel list to which user has subscribed
 export const getSubscribedChannels = asyncHandler(
   async (req: Request, res: Response) => {
+    try {
+      // 1. get channelId from user
+      const { subscriberId } = req.params;
+      if (!subscriberId || !Types.ObjectId.isValid(subscriberId))
+        throw new ApiError(500, 'Provide a valid channel ID');
 
+      // 2. check if subscriber exists
+      const subscriber: userType = await User.findById(subscriberId);
+      if (!subscriber) throw new ApiError(400, 'No such subscriber exists.');
+
+      // 3. find all docs having subscriberId = total subscriber
+      const channel = await Subscription.aggregate([
+        {
+          $match: {
+            subscriber: Types.ObjectId.createFromHexString(subscriberId),
+          },
+        },
+        {
+          $project: {
+            channel: 1,
+          },
+        },
+      ]);
+      if (!channel) throw new ApiError(500, 'Failed to fetch subscriber list');
+
+      // 4. return response
+      return res.status(200).json(new ApiResponse(200, channel, 'done'));
+    } catch (error) {
+      res
+        .status(error.statusCode)
+        .json(new ApiResponse(error.statusCode, {}, error.message));
+    }
   }
 );
