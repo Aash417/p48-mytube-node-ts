@@ -1,15 +1,15 @@
-import express, { Express } from 'express';
-import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import userRouter from './routes/user.routes';
-import healthcheckRouter from './routes/healthcheck.routes';
-import tweetRouter from './routes/tweet.routes';
-import subscriptionRouter from './routes/subscription.routes';
-import videoRouter from './routes/video.routes';
+import cors from 'cors';
+import express, { Express } from 'express';
 import commentRouter from './routes/comment.routes';
+import dashboardRouter from './routes/dashboard.routes';
+import healthcheckRouter from './routes/healthcheck.routes';
 import likeRouter from './routes/like.routes';
 import playlistRouter from './routes/playlist.routes';
-import dashboardRouter from './routes/dashboard.routes';
+import subscriptionRouter from './routes/subscription.routes';
+import tweetRouter from './routes/tweet.routes';
+import userRouter from './routes/user.routes';
+import videoRouter from './routes/video.routes';
 
 const app: Express = express();
 
